@@ -8,6 +8,22 @@ function spy_browser_warning_create(htmlStr) {
     return frag;
 }
 
+function spy_browser_warning_get_browser() {
+	var ua= navigator.userAgent, tem,
+	M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+	if(/trident/i.test(M[1])){
+		tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+		return 'IE '+(tem[1] || '');
+	}
+	if(M[1]=== 'Chrome'){
+		tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+		if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+	}
+	M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+	if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+	return M.join(' ');
+}
+
 function spy_browser_warning_get_content_warning() {
     var html = '<div id="spy-browser-warning">';
 	html += '<div class="spy-browser-warning-content">';
@@ -23,11 +39,14 @@ function spy_browser_warning_get_content_warning() {
 }
 
 window.onload = function() {
-	var fragment = spy_browser_warning_create(spy_browser_warning_get_content_warning());
-	document.body.insertBefore(fragment, document.body.childNodes[0]);
-	
-	var closeButton = document.getElementById("spy-browser-warning-close-button");
-	closeButton.addEventListener("click", function(){
-		document.getElementById("spy-browser-warning").remove();
-	});
+    var spy_browser_warning_browser = spy_browser_warning_get_browser();
+	if(spy_browser_warning_browser.indexOf("Chrome") > -1 || spy_browser_warning_browser.indexOf("IE") > -1 || spy_browser_warning_browser.indexOf("Safari") > -1 || spy_browser_warning_browser.indexOf("Edge") > -1 ) {
+		var fragment = spy_browser_warning_create(spy_browser_warning_get_content_warning());
+		document.body.insertBefore(fragment, document.body.childNodes[0]);
+		
+		var closeButton = document.getElementById("spy-browser-warning-close-button");
+		closeButton.addEventListener("click", function(){
+			document.getElementById("spy-browser-warning").remove();
+		});
+	}
 }
